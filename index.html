@@ -146,7 +146,7 @@ code.i2{background:#f1f5f9;padding:1px 6px;border-radius:4px;font-size:.85em}
     <div class="card problem-card">
       <h3>😣 過去的痛點</h3>
       <ul style="padding-left:18px;font-size:.92rem;color:#374151;margin-top:8px;">
-        <li style="margin-bottom:8px">21 萬筆線索紀錄裡只有 3.7 萬張是真正的 PASS 單，其餘只是 Call，無法直接分辨</li>
+        <li style="margin-bottom:8px">21 萬筆線索紀錄裡，只有約 3.7 萬筆帶有有效 PASS 日期，其餘多為只有 Call 的紀錄，需先篩出</li>
         <li style="margin-bottom:8px">PASS 類型與來源只寫在內文開頭，光「此為…」就有 1,700 多種寫法，無法統計</li>
         <li style="margin-bottom:8px">內容常常很短甚至空白，真正的需求、困擾填在別的欄位；還夾雜問候語與「請指派規劃師聯繫」等套語</li>
         <li style="margin-bottom:8px">PASS 之後有沒有被接手、有沒有商機、有沒有成交，要跨日報、商機、訂單三個系統人工比對</li>
@@ -198,7 +198,7 @@ flowchart TD
   <div class="steps">
     <div class="step"><div class="step-left"><div class="step-num">1</div><div class="step-line"></div></div><div class="step-body">
       <h4>Phase 1：撈取與認定</h4>
-      <p>CRM 線索主表加上客戶、代碼、員工對照；PASS 日期為有效 8 碼日期才算 PASS 單，只有 Call 的紀錄不納入。</p>
+      <p>CRM 線索主表加上客戶、代碼、員工對照；PASS 日期為有效 8 碼日期才算 PASS 單，沒有有效 PASS 日期的紀錄不納入。</p>
       <div class="step-detail">21.3 萬筆原始紀錄 → 37,152 張 PASS 單。每張單的「時間窗」＝ 同客戶下一張 PASS 與 PASS 日期＋180 天，取較早者，後續動作只看這個區間</div></div></div>
     <div class="step"><div class="step-left"><div class="step-num">2</div><div class="step-line"></div></div><div class="step-body">
       <h4>Phase 2：清理與固定架構拆欄</h4>
@@ -246,7 +246,7 @@ flowchart TD
       <h4>3.7 萬次 LLM 呼叫的成本與重跑</h4>
       <p>每次重跑全部重打，費用與時間都不可接受；呼叫失敗也不能讓整批作廢。</p>
       <div class="arrow">↓ 解決方案</div>
-      <p class="solution">以完整內容雜湊為 key 的快取＋20 個並行 Worker 與每分鐘上限；失敗不寫快取。最近一次重跑 37,031 種內容中只有 4 種是新的，約 13 秒完成</p></div>
+      <p class="solution">以完整內容雜湊為 key 的快取＋20 個並行 Worker 與每分鐘上限；失敗不寫快取。11/19 重跑時 37,031 種內容中只有 4 種是新的，約 13 秒完成</p></div>
     <div class="challenge-item"><div class="ch-label">Challenge 5</div>
       <h4>資料沒有「轉移時間」</h4>
       <p>CRM 沒記錄 PASS 何時轉到業務手上，歸屬表也只有現任歸屬，無法直接算「多久被接手」。</p>
@@ -276,7 +276,7 @@ flowchart TD
   <div class="stat-grid" style="margin-bottom:24px;">
     <div class="stat-card"><div class="number">37,152</div><div class="label">張 PASS 單完成清理分類</div></div>
     <div class="stat-card"><div class="number">27,885</div><div class="label">家法人完成五階段彙整</div></div>
-    <div class="stat-card"><div class="number">37,031</div><div class="label">種不重複內容完成 L1–L7</div></div>
+    <div class="stat-card"><div class="number">36,952</div><div class="label">張完成 L1–L7 標籤</div></div>
     <div class="stat-card"><div class="number">4 張</div><div class="label">可直接查詢的分析表</div></div>
   </div>
   <div class="two">
@@ -290,12 +290,12 @@ flowchart TD
     <div class="chart-card"><h4>L7 結果類型（張）</h4><div id="c-out" class="chart"></div></div>
   </div>
   <div class="chart-card"><h4>依最近等級的商機率與成交率（法人層級，%）</h4><div id="c-conv" class="chart"></div></div>
-  <div class="note">解讀提醒：A、B、E 與未填等級的法人都不到 30 家，不宜解讀；L 標籤為 LLM 萃取結果，引用前請對照 PASS 日期與 AI 業務摘要；L4 態度近 99% 為「積極」，區分度低。</div>
+  <div class="note">解讀提醒：A、B、E 與未填等級的法人都不到 30 家，不宜解讀；L 標籤為 LLM 萃取結果，引用前請對照 PASS 日期與 AI 業務摘要；L4 態度有填值者 96% 為「積極」，區分度低。</div>
   <div class="card" style="margin-top:16px;">
     <h3 style="margin-top:0">輸出產物說明</h3>
     <table>
       <tr><th>輸出名稱</th><th>說明</th><th>對業務／分析的價值</th></tr>
-      <tr><td><strong>pass_detail</strong></td><td>一張單一列（59 欄），含固定架構欄位、AI 業務摘要與 L1–L7</td><td>只查這一張就能看某公司所有過往 PASS 單與標籤，也可自行 GROUP BY 做月度、類型統計</td></tr>
+      <tr><td><strong>pass_detail</strong></td><td>一張單一列（60 欄），含固定架構欄位、AI 業務摘要與 L1–L7</td><td>只查這一張就能看某公司所有過往 PASS 單與標籤，也可自行 GROUP BY 做月度、類型統計</td></tr>
       <tr><td><strong>pass_company_summary</strong></td><td>一家公司一列（69 欄），S1–S5 五階段與最近一張單的標籤</td><td>一眼看出法人現在卡在哪個階段：有 PASS 沒接手？有商機沒成交？</td></tr>
       <tr><td><strong>pass_company_monthly_recent</strong></td><td>公司 × 月份，僅近兩年</td><td>追蹤近期 PASS 節奏與當月等級、需求分類</td></tr>
       <tr><td><strong>pass_company_summary_history</strong></td><td>公司彙整內容有變時的快照</td><td>回看法人狀態何時改變，例如何時第一次出現商機</td></tr>
@@ -326,7 +326,7 @@ flowchart TD
       <tr><td><strong>階段獨立</strong></td><td>S1–S5 各自彙整、缺值留空，不排成一條龍</td></tr>
       <tr><td><strong>固定架構</strong></td><td>需求、現況、困擾、時程、競爭等欄位統一，主表與補充說明合併不重複</td></tr>
       <tr><td><strong>增量歷史</strong></td><td>有變才附加快照；重複寫入前三張表為整張重建</td></tr>
-      <tr><td><strong>已知限制</strong></td><td>資料為全公司範圍；只有 Call 沒有 PASS 日期者不納入；當天新單後續欄位為空屬正常；9 大問題確切欄位尚未確認，未計算完整度</td></tr>
+      <tr><td><strong>已知限制</strong></td><td>資料為全公司範圍；沒有有效 PASS 日期者不納入；當天新單後續欄位為空屬正常；9 大問題確切欄位尚未確認，未計算完整度</td></tr>
     </table>
   </div>
 </section>
@@ -340,7 +340,7 @@ flowchart TD
 <script>
 
 mermaid.initialize({startOnLoad:true,theme:'base',themeVariables:{primaryColor:'#ede9fe',primaryTextColor:'#4c1d95',primaryBorderColor:'#c4b5fd',lineColor:'#64748b'},flowchart:{curve:'monotoneX'}});
-const D = {"PASS類型":{"客戶主動來電／來信":8468,"官網／E化單留言商機":5216,"待確認商機":4312,"Callin PASS單":3683,"僅述系統需求":3531,"未標示":2801,"專案／活動支援":1275,"0800／總機進線":1152,"Callout PASS單":1059,"補開立PASS單":1003,"名單／私田追蹤":968,"二次PASS商機":791,"單位轉PASS商機":683,"客服／EGO轉PASS商機":443,"官方LINE／線上客服":353,"內部轉介／轉經營":254,"新設／籌備公司":244,"歷史PASS客戶":237,"準C1商機":233,"其他":184,"業務拜訪回報":108,"就業學程開發商機":74,"行銷高機會名單":72,"未達標準PASS":8},"等級":{"C2":18199,"C1":14451,"D":4385,"E":31,"A":30,"B":25},"L6_current_temp":{"暖":21607,"熱":14265,"冷":1215},"L7_outcome_type":{"報價":10879,"延後":797,"進行中":675,"簽約":65,"拒絕":44},"funnel":{"S1_累計PASS單數":27885,"S2_看板單數":5868,"S2_二次PASS單數":1322,"S3_已接手單數":26586,"S4_有商機單數":3846,"S5_有成交單數":5175},"grade_conv":{"x":["A","B","C1","C2","D","E","未填"],"n":[23,14,11472,13434,2901,19,22],"s4":[17.4,0.0,19.4,9.8,10.2,5.3,13.6],"s5":[30.4,35.7,22.3,16.8,11.5,15.8,40.9]},"year":{"2015":2609,"2016":2536,"2017":2409,"2018":2459,"2019":2764,"2020":3162,"2021":3218,"2022":3235,"2023":3559,"2024":3963,"2025":4002,"2026":3236}};
+const D = {"PASS類型":{"客戶主動來電／來信":8468,"官網／E化單留言商機":5216,"待確認商機":4312,"Callin PASS單":3683,"僅述系統需求":3531,"未標示":2801,"專案／活動支援":1275,"0800／總機進線":1152,"Callout PASS單":1059,"補開立PASS單":1003,"名單／私田追蹤":968,"二次PASS商機":791,"單位轉PASS商機":683,"客服／EGO轉PASS商機":443,"官方LINE／線上客服":353,"內部轉介／轉經營":254,"新設／籌備公司":244,"歷史PASS客戶":237,"準C1商機":233,"其他":184,"業務拜訪回報":108,"就業學程開發商機":74,"行銷高機會名單":72,"未達標準PASS":8},"等級":{"C2":18199,"C1":14451,"D":4385,"E":31,"A":30,"B":25},"L6_current_temp":{"暖":21607,"熱":14265,"冷":1215},"L7_outcome_type":{"報價":10879,"延後":797,"進行中":675,"簽約":65,"拒絕":44},"funnel":{"S1_累計PASS單數":27885,"S2_看板單數":5865,"S2_二次PASS單數":1322,"S3_已接手單數":26586,"S4_有商機單數":3846,"S5_有成交單數":5175},"grade_conv":{"x":["A","B","C1","C2","D","E","未填"],"n":[23,14,11472,13434,2901,19,22],"s4":[17.4,0.0,19.4,9.8,10.2,5.3,13.6],"s5":[30.4,35.7,22.3,16.8,11.5,15.8,40.9]},"year":{"2015":2609,"2016":2536,"2017":2409,"2018":2459,"2019":2764,"2020":3162,"2021":3218,"2022":3235,"2023":3559,"2024":3963,"2025":4002,"2026":3236}};
 const CFG={responsive:true,displaylogo:false};
 const PAL=['#7c3aed','#2563eb','#059669','#d97706','#dc2626','#0891b2','#db2777','#65a30d','#64748b'];
 const base=(e)=>Object.assign({paper_bgcolor:'#fff',plot_bgcolor:'#fff',font:{color:'#334155',family:'-apple-system,PingFang TC,Microsoft JhengHei,sans-serif',size:12},margin:{l:50,r:20,t:10,b:40},xaxis:{gridcolor:'#e2e8f0'},yaxis:{gridcolor:'#e2e8f0'},legend:{orientation:'h',y:-0.2},showlegend:false},e||{});
