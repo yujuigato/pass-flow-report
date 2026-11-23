@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PASS 單清理彙整系統 — 流程文件</title>
+<style>
+*{box-sizing:border-box}
+body{font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif;background:#0f1117;color:#e2e8f0;margin:0;padding:0;line-height:1.7}
+.hero{background:linear-gradient(135deg,#1e3a5f,#0f2744 50%,#1a1040);padding:60px 40px;text-align:center;border-bottom:2px solid #2d4a7a}
+.hero h1{font-size:2.4em;color:#7dd3fc;margin:0 0 12px}
+.hero p{color:#94a3b8;font-size:1.1em;margin:6px 0}
+.tagline{color:#a78bfa!important;font-size:1.2em!important;margin-top:18px!important;font-weight:bold}
+.badge-row{display:flex;gap:10px;justify-content:center;margin-top:22px;flex-wrap:wrap}
+.badge{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:5px 14px;font-size:.83em;color:#94a3b8}
+.badge.green{border-color:#10b981;color:#10b981}
+.badge.blue{border-color:#3b82f6;color:#3b82f6}
+.badge.yellow{border-color:#f59e0b;color:#f59e0b}
+nav{background:#1a1f2e;border-bottom:1px solid #2d3748;position:sticky;top:0;z-index:100;padding:0 40px}
+nav ul{display:flex;list-style:none;margin:0;padding:0;overflow-x:auto}
+nav a{display:block;padding:13px 17px;color:#94a3b8;text-decoration:none;font-size:.88em;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s}
+nav a:hover{color:#7dd3fc;border-color:#7dd3fc}
+.section{max-width:1100px;margin:0 auto;padding:56px 40px;border-bottom:1px solid #1e2a3a}
+.section h2{color:#7dd3fc;font-size:1.75em;border-left:4px solid #3b82f6;padding-left:14px;margin-bottom:28px}
+.section h3{color:#a78bfa;font-size:1.15em;margin-top:28px}
+.lead{color:#94a3b8}
+.phase-card{background:#1a2035;border:1px solid #2d4a7a;border-radius:12px;padding:22px 26px;margin-bottom:18px;border-left:4px solid #64748b}
+.phase-card.done{border-left-color:#10b981}
+.phase-card.running{border-left-color:#f59e0b}
+.phase-tag{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.76em;font-weight:bold;margin-bottom:8px}
+.tag-done{background:#064e3b;color:#10b981;border:1px solid #10b981}
+.tag-running{background:#451a03;color:#f59e0b;border:1px solid #f59e0b}
+.phase-title{font-size:1.1em;color:#e2e8f0;font-weight:bold;margin-bottom:5px}
+.phase-meta{color:#94a3b8;font-size:.88em}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:14px;margin:22px 0}
+.stat-box{background:#1a2035;border:1px solid #2d4a7a;border-radius:10px;padding:18px;text-align:center}
+.stat-num{font-size:1.85em;font-weight:bold;color:#7dd3fc}
+.stat-label{color:#94a3b8;font-size:.82em;margin-top:5px}
+pre{background:#0d1117;border:1px solid #2d3748;border-radius:10px;padding:16px 20px;overflow-x:auto;margin:16px 0;line-height:1.65}
+pre code{font-family:'Cascadia Code','Fira Code',Consolas,monospace;font-size:.87em;color:#e2e8f0}
+.kw{color:#ff7b72}.st{color:#a5d6ff}.cm{color:#8b949e;font-style:italic}
+code.i{background:#1e2a3a;padding:1px 6px;border-radius:4px;color:#a5d6ff;font-size:.9em}
+table{width:100%;border-collapse:collapse;margin:16px 0}
+th{background:#1e2d4a;color:#7dd3fc;padding:9px 13px;text-align:left;font-size:.87em;border-bottom:2px solid #2d4a7a}
+td{padding:9px 13px;border-bottom:1px solid #1e2a3a;font-size:.85em;color:#cbd5e1;vertical-align:top}
+tr:hover td{background:#1a2035}
+.tw{overflow-x:auto}
+/* flow */
+.flow{display:flex;align-items:stretch;gap:0;margin:26px 0;flex-wrap:wrap;justify-content:center}
+.fstep{flex:1 1 190px;min-width:180px;background:#1a2035;border:1px solid #2d4a7a;border-radius:12px;padding:16px 16px;position:relative;margin:6px 14px 6px 0}
+.fstep:last-child{margin-right:0}
+.fstep:not(:last-child)::after{content:"\2192";position:absolute;right:-22px;top:50%;transform:translateY(-50%);color:#3b82f6;font-size:1.4em;font-weight:bold}
+.fstep .n{display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;border-radius:50%;background:#3b82f6;color:#0f1117;font-weight:bold;font-size:.82em;margin-bottom:6px}
+.fstep h4{margin:0 0 4px;color:#e2e8f0;font-size:1em}
+.fstep p{margin:0;color:#94a3b8;font-size:.82em}
+.fstep.sdr{border-top:3px solid #10b981}.fstep.mdr{border-top:3px solid #f59e0b}
+@media(max-width:700px){.fstep:not(:last-child)::after{content:"\2193";right:50%;top:auto;bottom:-24px;transform:translateX(50%)}.fstep{margin:6px 0 26px}.section{padding:40px 18px}nav{padding:0 10px}.hero{padding:40px 18px}}
+/* funnel */
+.funnel{margin:22px 0}
+.fn-row{display:flex;align-items:center;gap:12px;margin:8px 0}
+.fn-lab{width:150px;font-size:.85em;color:#94a3b8;flex:none}
+.fn-bar{height:28px;border-radius:6px;background:linear-gradient(90deg,#3b82f6,#7dd3fc);display:flex;align-items:center;padding-left:10px;font-size:.82em;font-weight:bold;color:#0f1117;white-space:nowrap}
+.bars{margin:18px 0}
+.bars .fn-bar{background:linear-gradient(90deg,#8b5cf6,#a78bfa)}
+.note{background:#1a2035;border:1px dashed #475569;border-radius:10px;padding:14px 18px;color:#94a3b8;font-size:.88em;margin:18px 0}
+.note b{color:#f59e0b}
+.corner-link{position:fixed;top:14px;right:16px;z-index:200;font-size:.78rem;font-weight:600;color:#94a3b8;text-decoration:none;padding:6px 13px;border-radius:99px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);box-shadow:0 1px 4px rgba(0,0,0,.2);transition:.15s}
+.corner-link:hover{color:#7dd3fc;border-color:#7dd3fc}
+footer{max-width:1100px;margin:0 auto;padding:30px 40px;color:#64748b;font-size:.82em;text-align:center}
+</style>
+</head>
+<body>
+<a href="https://yujuigato.github.io/" class="corner-link" target="_blank" rel="noopener">🔗 所有專案</a>
+
+<div class="hero">
+  <h1>PASS 單清理彙整系統</h1>
+  <p class="tagline">CRM PASS 單 → 清理分類 → LLM 萃取 L1–L7 → 法人五階段彙整 → 四張分析表</p>
+  <p>PASS Ticket Intelligence Pipeline &nbsp;·&nbsp; SQL + Rules + LLM</p>
+  <div class="badge-row">
+    <span class="badge green">37,129 張 PASS 單已清理</span>
+    <span class="badge green">27,874 家法人已彙整</span>
+    <span class="badge green">24 種 PASS 類型（規則分類）</span>
+    <span class="badge green">L1–L7 已萃取（37,031 種不重複內容）</span>
+    <span class="badge blue">四張表結構比照日報／問卷</span>
+    <span class="badge yellow">LLM 結果依內容雜湊快取</span>
+  </div>
+</div>
+
+<nav><ul>
+  <li><a href="#overview">系統概覽</a></li>
+  <li><a href="#biz">業務流程</a></li>
+  <li><a href="#pipeline">處理管線</a></li>
+  <li><a href="#clean">清理規則</a></li>
+  <li><a href="#type">PASS 類型</a></li>
+  <li><a href="#llm">LLM：摘要與 L1–L7</a></li>
+  <li><a href="#stages">法人五階段</a></li>
+  <li><a href="#tables">四張表</a></li>
+  <li><a href="#usage">使用與限制</a></li>
+</ul></nav>
+
+<div class="section" id="overview">
+  <h2>系統概覽</h2>
+  <p class="lead">PASS 單是電銷（SDR／MDR）判斷客戶有需求後，轉交業務經營的線索單。本專案把散在 CRM 的單據，加上後續日報、商機、成交，整理成可直接查詢與分析的資料表，做法比照日報彙整分析系統。</p>
+  <div class="stats-grid">
+    <div class="stat-box"><div class="stat-num">213,473</div><div class="stat-label">CRM 原始列（含只有 Call 的紀錄）</div></div>
+    <div class="stat-box"><div class="stat-num">37,129</div><div class="stat-label">有效 PASS 單</div></div>
+    <div class="stat-box"><div class="stat-num">27,874</div><div class="stat-label">法人公司數</div></div>
+    <div class="stat-box"><div class="stat-num">7,394</div><div class="stat-label">近兩年公司月度列</div></div>
+    <div class="stat-box"><div class="stat-num">1,301</div><div class="stat-label">30 天內短期再次 PASS</div></div>
+    <div class="stat-box"><div class="stat-num">4</div><div class="stat-label">輸出分析表</div></div>
+  </div>
+  <div class="phase-card done">
+    <span class="phase-tag tag-done">已完成</span>
+    <div class="phase-title">清理 → 分類 → 摘要 → L1–L7 → 彙整 → 寫入</div>
+    <div class="phase-meta">預設只輸出本機預覽檔，加 <code class="i">--write</code> 才寫入資料庫；LLM 結果以內容雜湊為 key 快取，重跑只會呼叫新內容。</div>
+  </div>
+</div>
+
+<div class="section" id="biz">
+  <h2>業務流程：PASS 單怎麼產生</h2>
+  <div class="flow">
+    <div class="fstep sdr"><span class="n">1</span><h4>電銷分工</h4><p><b>SDR</b>：顯性需求<br><b>MDR</b>：隱轉顯需求</p></div>
+    <div class="fstep"><span class="n">2</span><h4>9 大問題判斷</h4><p>回答 Y 的客戶進入電銷私田（行銷田）</p></div>
+    <div class="fstep"><span class="n">3</span><h4>開 PASS 單</h4><p>分五大類：ERP／ERPII、行業管議、OT、infra、敏態新生意</p></div>
+    <div class="fstep"><span class="n">4</span><h4>轉入業務私田</h4><p>業務接手經營，後續產生日報、商機、成交</p></div>
+  </div>
+  <h3>流程與資料欄位對應</h3>
+  <div class="tw"><table>
+    <tr><th>流程</th><th>資料欄位</th></tr>
+    <tr><td>SDR／MDR</td><td>PASS 來源分類：顯性／隱轉顯</td></tr>
+    <tr><td>五大類</td><td>需求分類碼</td></tr>
+    <tr><td>9 大問題</td><td>需求、使用人數、現況、困擾、時程、競爭、據點、主要產品等欄位（確切九項待確認）</td></tr>
+    <tr><td>轉入業務私田</td><td>CRM 沒有轉移時間，以 PASS 後第一筆業務日報作為接手時間</td></tr>
+  </table></div>
+</div>
+
+<div class="section" id="pipeline">
+  <h2>處理管線</h2>
+  <div class="flow">
+    <div class="fstep"><span class="n">1</span><h4>撈取</h4><p>CRM 線索主表＋客戶、代碼、員工對照</p></div>
+    <div class="fstep"><span class="n">2</span><h4>清理</h4><p>去換行、填充值、問候語、轉介套語</p></div>
+    <div class="fstep"><span class="n">3</span><h4>分類</h4><p>PASS 類型、狀態分類、補充說明拆欄</p></div>
+    <div class="fstep"><span class="n">4</span><h4>LLM 萃取</h4><p>AI 業務摘要＋L1–L7 深度標籤</p></div>
+    <div class="fstep"><span class="n">5</span><h4>串後續</h4><p>時間窗內的日報、商機、成交、看板</p></div>
+    <div class="fstep"><span class="n">6</span><h4>彙整寫入</h4><p>公司彙整、月度、歷史、明細</p></div>
+  </div>
+  <h3>資料來源（僅列類別；連線與資料表細節不公開）</h3>
+  <div class="tw"><table>
+    <tr><th>資料</th><th>來源表</th></tr>
+    <tr><td>PASS 單</td><td>CRM 線索主表</td></tr>
+    <tr><td>客戶名稱</td><td>CRM 客戶主檔</td></tr>
+    <tr><td>代碼對照</td><td>CRM 代碼對照表（工作狀態、客戶來源、PASS 來源、銷售進度、商機狀態）</td></tr>
+    <tr><td>員工姓名</td><td>員工主檔</td></tr>
+    <tr><td>事業日報、數科日報</td><td>CRM 日報表</td></tr>
+    <tr><td>事業商機、數科商機</td><td>CRM 商機表</td></tr>
+    <tr><td>成交訂單</td><td>訂單系統</td></tr>
+    <tr><td>機會看板</td><td>機會看板</td></tr>
+  </table></div>
+  <h3>PASS 單的認定</h3>
+  <p class="lead">PASS 日期為有效 8 碼日期，範圍 2010-01-01 到執行當天。原始約 21.3 萬筆中，約 3.7 萬筆是 PASS 單，其餘只有 Call 的紀錄不納入。</p>
+  <h3>每張單的「時間窗」</h3>
+<pre><code><span class="cm">-- 後續動作（日報／商機／成交）只看這個區間，避免把下一張單的事算進來</span>
+時間窗截止 = <span class="kw">MIN</span>( 同客戶下一張 PASS 單的日期,  PASS 日期 + <span class="st">180 天</span> )
+條件       = 日期 &gt;= PASS 日期  <span class="kw">AND</span>  日期 &lt; 時間窗截止
+
+<span class="cm">-- SDR 與行銷部門建立的紀錄不算「PASS 後業務接觸」</span></code></pre>
+  <div class="tw"><table>
+    <tr><th>後續動作</th><th>取法</th></tr>
+    <tr><td>業務日報（事業＋數科）</td><td>窗內最早與最新各一筆，並計窗內筆數</td></tr>
+    <tr><td>商機（事業＋數科）</td><td>窗內最早一筆（狀態 1／2／3）</td></tr>
+    <tr><td>成交訂單</td><td>窗內最早一張，金額為該單明細加總</td></tr>
+    <tr><td>機會看板</td><td>以 PASS 單號對應，取最新一筆（0 拒絕、1 待處理、2 完成、3 自動結案）</td></tr>
+  </table></div>
+</div>
+
+<div class="section" id="clean">
+  <h2>清理規則</h2>
+  <div class="tw"><table>
+    <tr><th>項目</th><th>做法</th></tr>
+    <tr><td>空白與換行</td><td>換行、tab、全形空白統一為單一空白</td></tr>
+    <tr><td>填充值</td><td>清掉沒有資訊的內容（NA、如描述、未定等）；「無」「暫無」只在「競爭」欄保留，其餘欄視為空</td></tr>
+    <tr><td>問候與結尾</td><td>去掉「Dear 某某」問候語與結尾的謝謝</td></tr>
+    <tr><td>轉介套語</td><td>「懇請／煩請指派規劃師聯繫」是電銷交接的固定收尾；12,786 單含此套語，拿掉後沒有實質內容的 69 單改標「待規劃師聯繫」</td></tr>
+    <tr><td>懸空引言</td><td>內文以「如下：」等收尾而後面沒有內容的 2,007 單，去除該引言</td></tr>
+    <tr><td>補充說明拆欄</td><td>固定範本「規模／現況／需求／使用人數／時程／預算／競爭／決策者／下一步預計行動／預計Demo方案／業務回饋」依關鍵字拆成欄位，範本外自由文字放「補充備註」</td></tr>
+    <tr><td>兩處都有填</td><td>需求、現況、使用人數、時程、競爭在主表與補充說明都有值時，用「；」合併，相同或包含者不重複</td></tr>
+    <tr><td>短期再次 PASS</td><td>同客戶 30 天內才視為連續；更久之後的單各自獨立</td></tr>
+  </table></div>
+  <div class="note"><b>備註：</b>2025 年之後的單，補充說明幾乎是空的（新系統不再使用該欄），固定架構欄位以主表欄位為主。</div>
+</div>
+
+<div class="section" id="type">
+  <h2>PASS 類型分類（規則，不呼叫 LLM）</h2>
+  <p class="lead">兩段判斷，由上到下，先符合者為準。規則由實際內文寫法歸納而來。</p>
+  <h3>第一段：內文開頭有「此為 XX」（約 29%，1,700 多種寫法）</h3>
+  <p class="lead">依 XX 歸成固定類別，例如待確認商機、Callin／Callout PASS 單、補開立 PASS 單、二次 PASS 商機、單位轉 PASS 商機、客服／EGO 轉 PASS 商機、專案／活動支援、行銷高機會名單、歷史 PASS 客戶，其餘為「其他」。</p>
+  <h3>第二段：沒有「此為」（約 71%）</h3>
+  <p class="lead">看內文前 60 字的線索來源或用語；只述「有系統評估需求」而沒說來源者為「僅述系統需求」，都不符合者為「未標示」。</p>
+  <div class="bars">
+    <div class="fn-row"><div class="fn-lab">客戶主動來電／來信</div><div class="fn-bar" style="width:100%">8,468</div></div>
+    <div class="fn-row"><div class="fn-lab">官網／E化單留言商機</div><div class="fn-bar" style="width:61.6%">5,216</div></div>
+    <div class="fn-row"><div class="fn-lab">待確認商機</div><div class="fn-bar" style="width:50.9%">4,308</div></div>
+    <div class="fn-row"><div class="fn-lab">Callin PASS單</div><div class="fn-bar" style="width:43.4%">3,676</div></div>
+    <div class="fn-row"><div class="fn-lab">僅述系統需求</div><div class="fn-bar" style="width:41.7%">3,531</div></div>
+    <div class="fn-row"><div class="fn-lab">未標示</div><div class="fn-bar" style="width:33.1%">2,800</div></div>
+    <div class="fn-row"><div class="fn-lab">專案／活動支援</div><div class="fn-bar" style="width:15.1%">1,275</div></div>
+    <div class="fn-row"><div class="fn-lab">0800／總機進線</div><div class="fn-bar" style="width:13.6%">1,152</div></div>
+    <div class="fn-row"><div class="fn-lab">其餘 16 類</div><div class="fn-bar" style="width:46%">合計 6,703</div></div>
+  </div>
+  <h3>狀態分類</h3>
+  <div class="stats-grid">
+    <div class="stat-box"><div class="stat-num">30,734</div><div class="stat-label">已 PASS</div></div>
+    <div class="stat-box"><div class="stat-num">5,438</div><div class="stat-label">其他</div></div>
+    <div class="stat-box"><div class="stat-num">957</div><div class="stat-label">未達標準</div></div>
+  </div>
+</div>
+
+<div class="section" id="llm">
+  <h2>LLM：AI 業務摘要與 L1–L7 深度標籤</h2>
+  <p class="lead">每張 PASS 單先組出「完整內容摘要」（結構化欄位＋業務原始描述；PASS 內容常常很短甚至空白，真正的內容其實填在需求、困擾等欄），再各呼叫一次 LLM，產出「AI 業務摘要」與 L1–L7 標籤。欄位 schema 與日報 Phase 2 完全對齊，之後可直接併入痛點需求機制整合。</p>
+  <div class="tw"><table>
+    <tr><th>層次</th><th>萃取欄位</th></tr>
+    <tr><td>L1 起因／阻礙</td><td>阻礙類型、影響範疇、急迫度（高／中／低）</td></tr>
+    <tr><td>L2 角色壓力</td><td>角色、壓力來源、指標</td></tr>
+    <tr><td>L3 戰略目標</td><td>目標類型、時間範圍、核心指標</td></tr>
+    <tr><td>L4 產業議題</td><td>議題名稱、外部驅動力、態度（積極／觀望／防禦）</td></tr>
+    <tr><td>L5 問項精煉</td><td>評估項目、比較對象（不含自家產品）、決策條件</td></tr>
+    <tr><td>L6 動態屬性</td><td>走向（升溫／降溫／持平）、觸發事件、溫度（熱／暖／冷）</td></tr>
+    <tr><td>L7 實戰對策</td><td>結果（簽約／報價／拒絕／延後／進行中）、關鍵因素、後續跟進；<b>進行中</b>時另有 L7_stage</td></tr>
+  </table></div>
+  <h3>工程設計</h3>
+  <div class="tw"><table>
+    <tr><th>項目</th><th>做法</th></tr>
+    <tr><td>快取</td><td>以「完整內容摘要」的雜湊為 key，內容沒變不重打。最近一次重跑：候選 37,031 種不重複內容，快取已有 37,027 種，只需呼叫 4 種，約 13 秒</td></tr>
+    <tr><td>平行化</td><td>執行緒池（20 workers）＋每分鐘請求上限，與日報系統同一套限流架構</td></tr>
+    <tr><td>失敗處理</td><td>呼叫失敗的內容不寫入快取，下次重跑自動補</td></tr>
+    <tr><td>歸一化</td><td>自由文字欄位做歸一化，沒有證據或內容過短（&lt;10 字）則為空字串</td></tr>
+    <tr><td>L7_stage</td><td>L7 結果為「進行中」者再細分：轉交業務、結案、提案／方案、說明／Demo、約訪／拜訪、評估／確認需求、提供資料、跟進、規劃中、其他</td></tr>
+  </table></div>
+  <div class="note"><b>注意：</b>L4_stance 近 99% 為「積極」，區分度低，不適合單獨篩選。L 標籤為 LLM 萃取結果，僅供參考，引用前請對照 PASS 日期與 AI 業務摘要判斷時效與正確性。</div>
+</div>
+
+<div class="section" id="stages">
+  <h2>法人五階段彙整（S1–S5）</h2>
+  <p class="lead">一家公司一列，五段各自彙整，階段之間<b>不串接成一條龍</b>：各階段彼此獨立，沒發生就留空或為 0，所以商機、成交日期可能早於業務接手日期。</p>
+  <div class="funnel">
+    <div class="fn-row"><div class="fn-lab">S1 PASS 建立</div><div class="fn-bar" style="width:100%">27,874 家</div></div>
+    <div class="fn-row"><div class="fn-lab">S3 業務接手</div><div class="fn-bar" style="width:95.7%">26,690 家</div></div>
+    <div class="fn-row"><div class="fn-lab">S2 機會看板</div><div class="fn-bar" style="width:21%">5,863 家</div></div>
+    <div class="fn-row"><div class="fn-lab">S5 有成交</div><div class="fn-bar" style="width:18.7%">5,209 家</div></div>
+    <div class="fn-row"><div class="fn-lab">S4 有商機</div><div class="fn-bar" style="width:13.9%">3,884 家</div></div>
+    <div class="fn-row"><div class="fn-lab">S2 二次 PASS</div><div class="fn-bar" style="width:4.8%">1,326 家</div></div>
+  </div>
+  <div class="tw"><table>
+    <tr><th>階段</th><th>主要欄位</th><th>算法</th></tr>
+    <tr><td>S1 PASS 建立</td><td>首次／最近 PASS 日期、累計／近兩年／近一年單數、SDR／MDR 單數、最近等級／狀態／需求／困擾／時程、等級與五大類分布</td><td>該公司所有 PASS 單</td></tr>
+    <tr><td>S2 派送處理</td><td>看板單數、最近看板狀態、二次 PASS 單數與日期</td><td>有機會看板或二次 PASS 的單</td></tr>
+    <tr><td>S3 業務接手</td><td>已接手單數、首次／最近接手日期與接手人、中位距 PASS 天數</td><td>接手日期＝各單 PASS 後第一筆業務日報</td></tr>
+    <tr><td>S4 商機</td><td>有商機單數、首筆／最近商機日期、類型、狀態、等級</td><td>各單時間窗內最早一筆商機</td></tr>
+    <tr><td>S5 成交</td><td>有成交單數、首次／最近成交日期、各單首張成交金額合計</td><td>各單時間窗內最早一張成交訂單</td></tr>
+  </table></div>
+  <h3>下一步與接手人</h3>
+  <p class="lead"><b>下一步</b>取時間窗內最早發生的動作（二次 PASS、轉入業務私田、商機、成交、短期再次 PASS），其他動作並列在「後續動作」。<b>接手人</b>為首次業務日報的建立人，與 PASS_SP、PASS 窗口及內文載明的 SP 比對，得出「接手人是否為 PASS 指定」（為「否」不一定有誤，可能轉給同事或先由電銷聯繫）。</p>
+</div>
+
+<div class="section" id="tables">
+  <h2>輸出的四張表</h2>
+  <div class="tw"><table>
+    <tr><th>表</th><th>一列代表</th><th>寫入方式</th></tr>
+    <tr><td><code class="i">pass_detail</code></td><td>一張 PASS 單（含該單的 L1–L7）</td><td>每次整張重建</td></tr>
+    <tr><td><code class="i">pass_company_summary</code></td><td>一家公司（目前最新狀態）</td><td>每次整張重建</td></tr>
+    <tr><td><code class="i">pass_company_monthly_recent</code></td><td>一家公司的一個月（僅近兩年）</td><td>每次整張重建</td></tr>
+    <tr><td><code class="i">pass_company_summary_history</code></td><td>公司彙整內容有變的那一次</td><td><b>有變才附加</b>（比照日報歷史表）</td></tr>
+  </table></div>
+  <h3>兩個維度怎麼分工</h3>
+  <div class="phase-card done">
+    <div class="phase-title">單的維度：pass_detail</div>
+    <div class="phase-meta">只放「當次」PASS 單本身，不帶後續。包含識別與日期、分類（負責類型、PASS 類型、PASS 來源、五大類、等級、工作狀態）、客戶資訊固定架構（規模、需求、使用人數、現況、困擾、時程、預算、競爭、決策者、據點、主要產品、下一步、Demo 方案、業務回饋）、指派與建立資訊、PASS 內容與 AI 業務摘要、L1–L7。要查某公司所有過往 PASS 單與標籤，只查這一張即可。</div>
+  </div>
+  <div class="phase-card done">
+    <div class="phase-title">法人的維度：pass_company_summary</div>
+    <div class="phase-meta">一家公司一列，S1–S5 五段彙整；每張單的後續（S2–S5）仍以該單的時間窗判斷，再彙總到法人，單層級後續不寫入資料庫。</div>
+  </div>
+  <h3>歷史快照規則</h3>
+  <p class="lead">比對時不看「快照日期」「寫入時間」；公司第一次出現，或內容與歷史表最新一筆不同，才附加一列。同一天重跑、沒有變動不會重複附加。欄位改版時保留舊列重建。</p>
+  <h3>查詢範例</h3>
+<pre><code><span class="cm">-- 某家公司所有過往 PASS 單（新到舊），含深度標籤</span>
+<span class="kw">SELECT</span> PASS日期, 等級, 狀態分類, 需求, 困擾, AI業務摘要,
+       L6_current_temp, L6_direction, L7_outcome_type, L7_stage, L5_competitors, L7_next_step
+<span class="kw">FROM</span> pass_detail
+<span class="kw">WHERE</span> 潛客代號 = N<span class="st">'請填潛客代號'</span>
+<span class="kw">ORDER BY</span> PASS日期 <span class="kw">DESC</span>;
+
+<span class="cm">-- 月度統計（取代全歷史月度表）</span>
+<span class="kw">SELECT</span> 潛客代號, 年月, <span class="kw">COUNT</span>(*) <span class="kw">AS</span> 當月PASS單數
+<span class="kw">FROM</span> pass_detail
+<span class="kw">GROUP BY</span> 潛客代號, 年月;</code></pre>
+</div>
+
+<div class="section" id="usage">
+  <h2>執行方式與限制</h2>
+<pre><code>python run.py            <span class="cm"># 預覽：輸出預覽 xlsx，不寫資料庫</span>
+python run.py --write    <span class="cm"># 寫入：前三張重建，歷史表有變才附加</span></code></pre>
+  <div class="tw"><table>
+    <tr><th>參數</th><th>預設</th><th>說明</th></tr>
+    <tr><td>WINDOW_DAYS</td><td>180</td><td>後續動作時間窗上限，可依業務判斷調整</td></tr>
+    <tr><td>SHORT_REPASS_DAYS</td><td>30</td><td>短期再次 PASS 的判定天數</td></tr>
+  </table></div>
+  <h3>與原型 SQL 的差異</h3>
+  <div class="tw"><table>
+    <tr><th>項目</th><th>原 SQL</th><th>本流程</th></tr>
+    <tr><td>後續動作時間範圍</td><td>無上限</td><td>時間窗（下一張 PASS 或 180 天）</td></tr>
+    <tr><td>事業與數科日報、商機</td><td>分開兩組欄位</td><td>合併成一條</td></tr>
+    <tr><td>挑第一張訂單</td><td>依部門前綴排序</td><td>取最早成交日</td></tr>
+  </table></div>
+  <h3>已知限制</h3>
+  <ul class="lead">
+    <li>資料範圍是全公司，不只單一產業。</li>
+    <li>只有 Call 紀錄、沒有 PASS 日期的資料不納入。</li>
+    <li>當天剛建立的單，後續欄位為空屬正常。</li>
+    <li>業務私田的接手時間只能參考日報；歸屬表只有現任歸屬，沒有歷史。</li>
+    <li>9 大問題的確切欄位尚未確認，目前沒有計算完整度。</li>
+    <li>重複執行 <code class="i">--write</code>：前三張重建，歷史表再附加一份快照（有變才附加）。</li>
+  </ul>
+</div>
+
+<footer>PASS 單清理彙整系統 · 流程文件 · 內部連線設定、伺服器位址與客戶資料不在本文件範圍</footer>
+</body>
+</html>
