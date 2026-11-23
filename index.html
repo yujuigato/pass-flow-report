@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PASS 單痛需萃取系統｜PASS Pain-Need Extraction Pipeline</title>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
-<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 <style>
 :root{--primary:#7c3aed;--primary-dark:#6d28d9;--primary-light:#f5f3ff;--accent:#2563eb;--success:#059669;--warning:#d97706;--danger:#dc2626;--bg:#f8fafc;--card:#ffffff;--border:#e2e8f0;--text:#0f172a;--text-muted:#64748b;--text-light:#94a3b8;}
     *{box-sizing:border-box;margin:0;padding:0;}
@@ -279,18 +278,13 @@ flowchart TD
     <div class="stat-card"><div class="number">36,952</div><div class="label">張完成 L1–L7 標籤</div></div>
     <div class="stat-card"><div class="number">4 張</div><div class="label">可直接查詢的分析表</div></div>
   </div>
-  <div class="two">
-    <div class="chart-card"><h4>PASS 類型分布（24 類）</h4><div id="c-type" class="chart tall"></div></div>
-    <div>
-      <div class="chart-card"><h4>各階段法人家數</h4><div id="c-funnel" class="chart"></div></div>
-    </div>
+  <div class="stat-grid" style="margin-bottom:24px;">
+    <div class="stat-card"><div class="number">26,586</div><div class="label">家法人已由業務接手（中位數 PASS 後 1 天）</div></div>
+    <div class="stat-card"><div class="number">3,846</div><div class="label">家法人有商機</div></div>
+    <div class="stat-card"><div class="number">5,175</div><div class="label">家法人有成交</div></div>
+    <div class="stat-card"><div class="number">22.3 億</div><div class="label">成交金額合計（各單首張）</div></div>
   </div>
-  <div class="two">
-    <div class="chart-card"><h4>L6 目前溫度（張）</h4><div id="c-temp" class="chart"></div></div>
-    <div class="chart-card"><h4>L7 結果類型（張）</h4><div id="c-out" class="chart"></div></div>
-  </div>
-  <div class="chart-card"><h4>依最近等級的商機率與成交率（法人層級，%）</h4><div id="c-conv" class="chart"></div></div>
-  <div class="note">解讀提醒：A、B、E 與未填等級的法人都不到 30 家，不宜解讀；L 標籤為 LLM 萃取結果，引用前請對照 PASS 日期與 AI 業務摘要；L4 態度有填值者 96% 為「積極」，區分度低。</div>
+  <div class="note">解讀提醒：L 標籤為 LLM 萃取結果，引用前請對照 PASS 日期與 AI 業務摘要；L4 態度有填值者 96% 為「積極」，區分度低。</div>
   <div class="card" style="margin-top:16px;">
     <h3 style="margin-top:0">輸出產物說明</h3>
     <table>
@@ -340,22 +334,6 @@ flowchart TD
 <script>
 
 mermaid.initialize({startOnLoad:true,theme:'base',themeVariables:{primaryColor:'#ede9fe',primaryTextColor:'#4c1d95',primaryBorderColor:'#c4b5fd',lineColor:'#64748b'},flowchart:{curve:'monotoneX'}});
-const D = {"PASS類型":{"客戶主動來電／來信":8468,"官網／E化單留言商機":5216,"待確認商機":4312,"Callin PASS單":3683,"僅述系統需求":3531,"未標示":2801,"專案／活動支援":1275,"0800／總機進線":1152,"Callout PASS單":1059,"補開立PASS單":1003,"名單／私田追蹤":968,"二次PASS商機":791,"單位轉PASS商機":683,"客服／EGO轉PASS商機":443,"官方LINE／線上客服":353,"內部轉介／轉經營":254,"新設／籌備公司":244,"歷史PASS客戶":237,"準C1商機":233,"其他":184,"業務拜訪回報":108,"就業學程開發商機":74,"行銷高機會名單":72,"未達標準PASS":8},"等級":{"C2":18199,"C1":14451,"D":4385,"E":31,"A":30,"B":25},"L6_current_temp":{"暖":21607,"熱":14265,"冷":1215},"L7_outcome_type":{"報價":10879,"延後":797,"進行中":675,"簽約":65,"拒絕":44},"funnel":{"S1_累計PASS單數":27885,"S2_看板單數":5865,"S2_二次PASS單數":1322,"S3_已接手單數":26586,"S4_有商機單數":3846,"S5_有成交單數":5175},"grade_conv":{"x":["A","B","C1","C2","D","E","未填"],"n":[23,14,11472,13434,2901,19,22],"s4":[17.4,0.0,19.4,9.8,10.2,5.3,13.6],"s5":[30.4,35.7,22.3,16.8,11.5,15.8,40.9]},"year":{"2015":2609,"2016":2536,"2017":2409,"2018":2459,"2019":2764,"2020":3162,"2021":3218,"2022":3235,"2023":3559,"2024":3963,"2025":4002,"2026":3236}};
-const CFG={responsive:true,displaylogo:false};
-const PAL=['#7c3aed','#2563eb','#059669','#d97706','#dc2626','#0891b2','#db2777','#65a30d','#64748b'];
-const base=(e)=>Object.assign({paper_bgcolor:'#fff',plot_bgcolor:'#fff',font:{color:'#334155',family:'-apple-system,PingFang TC,Microsoft JhengHei,sans-serif',size:12},margin:{l:50,r:20,t:10,b:40},xaxis:{gridcolor:'#e2e8f0'},yaxis:{gridcolor:'#e2e8f0'},legend:{orientation:'h',y:-0.2},showlegend:false},e||{});
-const keys=o=>Object.keys(o), vals=o=>Object.values(o);
-function hbar(id,o,color,m){const k=keys(o).reverse(),v=vals(o).reverse();Plotly.newPlot(id,[{type:'bar',orientation:'h',y:k,x:v,text:v.map(n=>n.toLocaleString()),textposition:'outside',cliponaxis:false,marker:{color:color}}],base({margin:m}),CFG);}
-function pie(id,o){Plotly.newPlot(id,[{type:'pie',labels:keys(o),values:vals(o),hole:.45,marker:{colors:PAL},textinfo:'label+percent',sort:false}],base({margin:{l:10,r:10,t:10,b:10}}),CFG);}
-const ord=(o,a)=>{const r={};a.forEach(k=>{if(k in o)r[k]=o[k]});keys(o).forEach(k=>{if(!(k in r))r[k]=o[k]});return r;};
-hbar('c-type',D['PASS類型'],PAL[0],{l:150,r:60,t:10,b:30});
-const F=D.funnel;
-const fk=[['S1 PASS 建立','S1_累計PASS單數'],['S3 業務接手','S3_已接手單數'],['S2 機會看板','S2_看板單數'],['S5 有成交','S5_有成交單數'],['S4 有商機','S4_有商機單數'],['S2 二次 PASS','S2_二次PASS單數']];
-Plotly.newPlot('c-funnel',[{type:'bar',orientation:'h',y:fk.map(x=>x[0]).reverse(),x:fk.map(x=>F[x[1]]).reverse(),text:fk.map(x=>F[x[1]].toLocaleString()+' 家').reverse(),textposition:'outside',cliponaxis:false,marker:{color:PAL[1]}}],base({margin:{l:100,r:80,t:10,b:30}}),CFG);
-pie('c-temp',ord(D['L6_current_temp'],['熱','暖','冷']));
-pie('c-out',D['L7_outcome_type']);
-const G=D.grade_conv,xs=G.x.map((g,i)=>g+'（'+G.n[i].toLocaleString()+'家）');
-Plotly.newPlot('c-conv',[{type:'bar',name:'商機率 %',x:xs,y:G.s4,marker:{color:PAL[3]}},{type:'bar',name:'成交率 %',x:xs,y:G.s5,marker:{color:PAL[2]}}],base({barmode:'group',showlegend:true}),CFG);
 
 </script>
 </body>
